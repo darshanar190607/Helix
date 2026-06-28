@@ -13,6 +13,7 @@ import { GridHeader } from './components/GridHeader';
 import { VirtualGrid } from './components/VirtualGrid';
 import { AnalyticsChart } from './components/AnalyticsChart';
 import { InfraToggles } from './components/InfraToggles';
+import { PausedAnalyticsOverlay } from './components/PausedAnalyticsOverlay';
 
 export const App: React.FC = () => {
   // Feature 6: Operator Workspace Layout Persistence
@@ -22,8 +23,8 @@ export const App: React.FC = () => {
     togglesVisible: true,
   });
 
-  // Track state engine snapshot to drive top navbar & controls
   const [snapshot, setSnapshot] = useState<StateEngineSnapshot | null>(null);
+  const [analyticsOpen, setAnalyticsOpen] = useState(false);
 
   // Restore layout on mount
   useEffect(() => {
@@ -46,6 +47,8 @@ export const App: React.FC = () => {
     const engine = StateEngine.getInstance();
     const unsubscribe = engine.subscribe((snap) => {
       setSnapshot(snap);
+      // Auto-close analytics overlay when stream resumes
+      if (!snap.isPaused) setAnalyticsOpen(false);
       // Tick counter via DOM ref — no extra setState
       if (!snap.isPaused) {
         tickCountRef.current += 1;
@@ -106,6 +109,9 @@ export const App: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-darkBg text-textPrimary select-none">
+      {analyticsOpen && snapshot?.isPaused && (
+        <PausedAnalyticsOverlay onClose={() => setAnalyticsOpen(false)} />
+      )}
       {/* Navbar Headers */}
       <header className="flex items-center justify-between px-6 h-14 bg-darkSurface border-b border-darkBorder z-20 shrink-0 select-none shadow-md relative">
         {/* Top accent line */}
@@ -130,6 +136,8 @@ export const App: React.FC = () => {
           <PauseControl
             isPaused={snapshot?.isPaused || false}
             bufferedBatchesCount={snapshot?.bufferedBatchesCount || 0}
+            onAnalyticsView={() => setAnalyticsOpen(prev => !prev)}
+            analyticsOpen={analyticsOpen}
           />
           <SearchBar initialValue={snapshot?.searchQuery || ''} />
         </div>
