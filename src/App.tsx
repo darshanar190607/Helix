@@ -14,6 +14,7 @@ import { VirtualGrid } from './components/VirtualGrid';
 import { AnalyticsChart } from './components/AnalyticsChart';
 import { InfraToggles } from './components/InfraToggles';
 import { PausedAnalyticsOverlay } from './components/PausedAnalyticsOverlay';
+import { SnapshotExportButton } from './components/SnapshotExportButton';
 
 export const App: React.FC = () => {
   // Feature 6: Operator Workspace Layout Persistence
@@ -183,6 +184,9 @@ export const App: React.FC = () => {
 
           {/* Action Cleaners */}
           <div className="flex items-center space-x-2 shrink-0">
+            {/* Bounty Task 3: Snapshot Export — exports current filtered+sorted view as CSV */}
+            <SnapshotExportButton />
+
             {snapshot && snapshot.sortPriority.length > 0 && (
               <button
                 onClick={handleClearSort}
